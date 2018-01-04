@@ -1,5 +1,11 @@
 document.addEventListener("DOMContentLoaded", function() {
-  var ulElection = document.querySelector('#election')
+  var ulElection = document.querySelector('#election'),
+      refreshBtn = document.querySelector('#refresh');
+
+  refreshBtn.addEventListener('click', function() {
+    location.reload();
+  })
+
   $.ajax({
     url: 'https://bb-election-api.herokuapp.com/',
     method: 'GET',
@@ -16,23 +22,31 @@ document.addEventListener("DOMContentLoaded", function() {
       li.insertAdjacentElement('afterend', form);
       var submitBtn = document.createElement('button')
       var hiddenFld = document.createElement('input')
-      hiddenFld.setAttribute('hidden', 'true')
+      hiddenFld.setAttribute('type', 'hidden')
       hiddenFld.setAttribute('name', 'name')
       hiddenFld.setAttribute('value', candidate.name)
       submitBtn.setAttribute('type', 'submit')
       submitBtn.innerText = 'vote ' + candidate.name
       form.insertAdjacentElement('beforeend', hiddenFld)
       form.insertAdjacentElement('beforeend', submitBtn)
+
+      form.addEventListener('submit', function(e){
+        e.preventDefault();
+        $.ajax({
+          url: 'https://bb-election-api.herokuapp.com/vote',
+          method: 'POST',
+          data: {'name': this.querySelector('input[type=hidden]').value},
+          dataType: 'json'
+        }).done(function(responseData) {
+          alert('Successfully voted for ' + candidate.name)
+          location.reload();
+        }).fail(function() {
+          console.log('Voting Fail')
+        })
+
+
+      })
     })
   })
-/*
-  $.ajax({
-    url: 'https://bb-election-api.herokuapp.com/vote',
-    body: {'name': 'Gary'},
-    method: 'POST',
-    data: {},
-    dataType: 'json'
-  })
-*/
 
 });
