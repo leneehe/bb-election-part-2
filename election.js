@@ -2,7 +2,8 @@ document.addEventListener("DOMContentLoaded", function() {
   var ulElection = document.querySelector('#election'),
       refreshBtn = document.querySelector('#refresh');
 
-  refreshBtn.addEventListener('click', function() {
+  refreshBtn.addEventListener('click', function(e) {
+    e.preventDefault()
     location.reload();
   })
 
@@ -39,7 +40,20 @@ document.addEventListener("DOMContentLoaded", function() {
           dataType: 'json'
         }).done(function(responseData) {
           alert('Successfully voted for ' + candidate.name)
-          location.reload();
+
+          $.ajax({
+            url: 'https://bb-election-api.herokuapp.com/',
+            method: 'GET',
+            dataType: 'json'
+          }).done(function(responseData){
+            var list = ulElection.querySelectorAll('li')
+            for (var i = 0; i < responseData.candidates.length; i++) {
+              list[i].innerHTML = '<b>' + responseData.candidates[i].name + ':</b> ' + responseData.candidates[i].votes + ' votes';
+            }
+
+          })
+
+          // location.reload();
         }).fail(function() {
           console.log('Voting Fail')
         })
